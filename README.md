@@ -96,7 +96,7 @@ Make sure you have `easy_localization` already set up in your project.
 ### **Install Tool**
 ```yaml
 dev_dependencies:
-  flutter_hardcode_localizer: ^1.0.1
+  flutter_hardcode_localizer: ^1.0.2
 ```
 
 ### **Run Tool**
