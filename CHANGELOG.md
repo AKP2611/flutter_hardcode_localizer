@@ -4,9 +4,9 @@
 
 ### 🎉Reviewed Pub.dev Analysis
 #### New Features
-- ✅ **Added Example
-- ✅ **Platform support constraints updated
-- ✅ **Developer Comments added for classes
+- ✅ Added Example
+- ✅ Platform support constraints updated
+- ✅ Developer Comments added for classes
 
 ## [1.0.2] - 2025-08-14
 
