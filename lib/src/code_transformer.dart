@@ -22,10 +22,10 @@ class CodeTransformer {
   ///
   /// Handles code formatting errors gracefully: falls back to unformatted code.
   Future<void> replaceStringWithLocale(
-      File file,
-      HardcodedStringInfo stringInfo,
-      String key,
-      ) async {
+    File file,
+    HardcodedStringInfo stringInfo,
+    String key,
+  ) async {
     final content = await file.readAsString();
 
     // Format string as required by easy_localization: LocaleKeys.key.tr()
@@ -59,9 +59,9 @@ class CodeTransformer {
   ///
   /// Throws an exception if NO replacements succeed (prevents silent failures).
   Future<void> replaceMultipleStrings(
-      File file,
-      List<MapEntry<HardcodedStringInfo, String>> replacements,
-      ) async {
+    File file,
+    List<MapEntry<HardcodedStringInfo, String>> replacements,
+  ) async {
     final content = await file.readAsString();
 
     // Descending offset ensures early replacements don't shift later offsets

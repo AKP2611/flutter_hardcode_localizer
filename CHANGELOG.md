@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.4] - 2025-08-18
+
+### 🎉New Tool features added 
+#### additional optional arguments added for CLI tool
+```bash
+dart run flutter_hardcode_localizer:localize \
+  --targetPath example \
+  --skipFiles lib/widgets/skip_file_1.dart,lib/widgets/skip_file_2.dart  \
+  --autoApproveSuggestedKeys true
+  
+--targetPath
+(Optional) Path to your project’s target directory.
+
+--autoApproveSuggestedKeys
+(Optional, true/false) Automatically approve suggested JSON keys without developer consent.
+
+--skipFiles
+(Optional) Comma-separated list of file paths to skip during processing.
+
+lib/ui/theme/codegen_key.g.dart will be skipped automatically, no need to manually add this in skipFiles array  
+```
+
 ## [1.0.3] - 2025-08-18
 
 ### 🎉Reviewed Pub.dev Analysis

@@ -79,8 +79,7 @@ class JsonManager {
 
     // Sort keys for consistency and easy comparison/version control
     final sortedMap = Map<String, dynamic>.fromEntries(
-        _translations.entries.toList()..sort((a, b) => a.key.compareTo(b.key))
-    );
+        _translations.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
 
     // Pretty-print JSON to disk
     const encoder = JsonEncoder.withIndent('  ');

@@ -28,7 +28,8 @@ import 'src/code_transformer.dart';
 /// - Automatically updates assets/languages/en.json and replaces source code with LocaleKeys references.
 /// - Handles duplicate keys, context-aware user prompts, and robust error handling.
 /// - Prints a summary at the end and next steps for easy_localization users.
-Future<void> runLocalizationTool(String projectPath) async {
+Future<void> runLocalizationTool(String projectPath,
+    bool autoApproveSuggestedKeys, List<String> skipFiles) async {
   final libDir = Directory(p.join(projectPath, 'lib'));
 
   // Validates there is a 'lib' folder. Throws error if missing.
@@ -59,6 +60,14 @@ Future<void> runLocalizationTool(String projectPath) async {
   // Process each Dart file and ask about each hardcoded string.
   for (final file in dartFiles) {
     final relativePath = p.relative(file.path, from: projectPath);
+
+    bool canSkipFile = skipFiles
+        .any((test) => test.toLowerCase() == relativePath.toLowerCase());
+
+    if (canSkipFile) {
+      print('   ⏭️  Skipped $relativePath');
+      continue;
+    }
     print('📄 Processing: $relativePath');
 
     // Discover all localizable hardcoded strings.
@@ -83,32 +92,44 @@ Future<void> runLocalizationTool(String projectPath) async {
       // Show relevant code context for where string occurs
       await _showStringContext(stringInfo, file);
 
-      // Prompt for localization decision (yes/no/custom key)
-      stdout.write('   ❓ Move to localization? (y/n/c for custom key): ');
-      final input = stdin.readLineSync()?.toLowerCase();
+      String key = stringInfo.suggestedKey;
+      if (autoApproveSuggestedKeys) {
+        // Auto-approve localization for all strings
+        print(
+            '   ✅ Auto-approved localization for: "${stringInfo.value}" with key "$key"');
+      } else {
+        // Prompt for localization decision (yes/no/custom key)
+        stdout.write('   ❓ Move to localization? (y/n/c for custom key): ');
+        final input = stdin.readLineSync()?.toLowerCase();
 
-      if (input == null || input == 'n') {
-        print('   ⏭️  Skipped');
-        continue;
-      }
-
-      String key;
-      if (input == 'c') {
-        stdout.write('   🔑 Enter custom key: ');
-        key = stdin.readLineSync() ?? '';
-        if (key.isEmpty) {
-          print('   ❌ Invalid key, skipping');
+        if (input == null || input == 'n') {
+          print('   ⏭️  Skipped');
           continue;
         }
-      } else {
-        key = stringInfo.suggestedKey;
+
+        if (input == 'c') {
+          stdout.write('   🔑 Enter custom key: ');
+          key = stdin.readLineSync() ?? '';
+          if (key.isEmpty) {
+            print('   ❌ Invalid key, skipping');
+            continue;
+          }
+        } else {
+          key = stringInfo.suggestedKey;
+        }
       }
+
+      bool addToJson = true;
 
       // Handle duplicates: prompt user to use a different key if it’s taken
       if (await jsonManager.keyExists(key)) {
         print('   ⚠️  Key "$key" already exists in en.json');
-        stdout.write('   ❓ Use different key? (y/n): ');
-        final useOther = stdin.readLineSync()?.toLowerCase() == 'y';
+        stdout.write('   ❓ Use different key? (y/n/s): ');
+        final enteredOption = stdin.readLineSync()?.toLowerCase();
+
+        final useOther = enteredOption == 'y';
+        final skipKey = enteredOption == 's';
+        final useSameKey = enteredOption == 'n';
 
         if (useOther) {
           stdout.write('   🔑 Enter new key: ');
@@ -119,17 +140,28 @@ Future<void> runLocalizationTool(String projectPath) async {
             print('   ❌ Invalid key, skipping');
             continue;
           }
-        } else {
+        } else if (skipKey) {
           print('   ⏭️  Skipped due to duplicate key');
+          continue;
+        } else if (useSameKey) {
+          addToJson = false;
+        } else {
+          print('   ⏭️  Skipped due to invalid input');
           continue;
         }
       }
 
-      // Add key-value translation and record for code replacement.
-      await jsonManager.addTranslation(key, stringInfo.value);
+      if (addToJson) {
+        // Add key-value translation and record for code replacement.
+        await jsonManager.addTranslation(key, stringInfo.value);
+        print('   ✅ Added "$key": "${stringInfo.value}" to en.json');
+      } else {
+        // Reused same json key to replace in code
+        print('   ♻️ Reused "$key": "${stringInfo.value}" from en.json');
+      }
+
       replacements.add(MapEntry(stringInfo, key));
 
-      print('   ✅ Added "$key": "${stringInfo.value}" to en.json');
       totalStringProcessed++;
     }
 
@@ -137,7 +169,9 @@ Future<void> runLocalizationTool(String projectPath) async {
     if (replacements.isNotEmpty) {
       try {
         await transformer.replaceMultipleStrings(file, replacements);
-        print('   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
+        print('\n');
+        print(
+            '   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
       } catch (e) {
         print('   ❌ Failed to apply batch replacements: $e');
         print('   🔄 Trying individual replacements...');
@@ -147,14 +181,16 @@ Future<void> runLocalizationTool(String projectPath) async {
           try {
             await transformer.replaceStringWithLocale(
                 file, replacement.key, replacement.value);
-            print('   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
+            print(
+                '   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
             successCount++;
           } catch (e) {
             print('   ❌ Failed to replace "${replacement.key.value}": $e');
           }
         }
         if (successCount > 0) {
-          print('   ✨ Successfully applied $successCount individual replacement(s)');
+          print(
+              '   ✨ Successfully applied $successCount individual replacement(s)');
         }
       }
     }

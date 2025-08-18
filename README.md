@@ -102,10 +102,24 @@ dev_dependencies:
 ### **Run Tool**
 ```bash
 # On current directory
-dart run flutter_hardcode_localizer:localize
+dart run flutter_hardcode_localizer:localize 
 
-# On specific project  
-dart run flutter_hardcode_localizer:localize /path/to/flutter/project
+# With arguments including features 
+dart run flutter_hardcode_localizer:localize \
+  --targetPath example \
+  --skipFiles lib/widgets/skip_file_1.dart,lib/widgets/skip_file_2.dart  \
+  --autoApproveSuggestedKeys true
+  
+--targetPath
+(Optional) Path to your project’s target directory.
+
+--autoApproveSuggestedKeys
+(Optional, true/false) Automatically approve suggested JSON keys without developer consent.
+
+--skipFiles
+(Optional) Comma-separated list of file paths to skip during processing.
+
+lib/ui/theme/codegen_key.g.dart will be skipped automatically, no need to manually add this in skipFiles array
 ```
 
 ## 📋 **Complete easy_localization Workflow**

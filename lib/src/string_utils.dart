@@ -14,7 +14,7 @@ class StringUtils {
   static String generateKey(String value) {
     // Remove non-word characters and lower-case everything
     final cleaned =
-    value.replaceAll(RegExp(r'[^\w\s]'), ' ').trim().toLowerCase();
+        value.replaceAll(RegExp(r'[^\w\s]'), ' ').trim().toLowerCase();
 
     final words = cleaned.split(RegExp(r'\s+'));
 
