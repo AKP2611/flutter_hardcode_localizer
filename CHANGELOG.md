@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.3] - 2025-08-18
+
+### 🎉Reviewed Pub.dev Analysis
+#### New Features
+- ✅ **Added Example
+
+## [1.0.2] - 2025-08-14
+
+### 🎉Repository Licence updated
+
 ## [1.0.1] - 2025-08-14
 
 ### 🚀 Enhanced for easy_localization Integration

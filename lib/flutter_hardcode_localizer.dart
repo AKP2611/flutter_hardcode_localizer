@@ -1,11 +1,11 @@
 /// Flutter Hardcode Localizer v1.0.1
-/// 
-/// A tool for finding hardcoded strings in Flutter projects and 
+///
+/// A tool for finding hardcoded strings in Flutter projects and
 /// providing quick-fix functionality to move them to localization files.
-/// 
+///
 /// ENHANCED IN v1.0.1:
 /// - Seamless integration with easy_localization package
-/// - Generates LocaleKeys.key.tr() format automatically  
+/// - Generates LocaleKeys.key.tr() format automatically
 /// - Eliminates manual process of adding JSON key-values
 /// - Perfect companion for easy_localization workflow
 library flutter_hardcode_localizer;
@@ -126,7 +126,8 @@ Future<void> runLocalizationTool(String projectPath) async {
     if (replacements.isNotEmpty) {
       try {
         await transformer.replaceMultipleStrings(file, replacements);
-        print('   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
+        print(
+            '   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
       } catch (e) {
         print('   ❌ Failed to apply batch replacements: $e');
         print('   🔄 Trying individual replacements...');
@@ -136,18 +137,17 @@ Future<void> runLocalizationTool(String projectPath) async {
         for (final replacement in replacements) {
           try {
             await transformer.replaceStringWithLocale(
-              file, 
-              replacement.key, 
-              replacement.value
-            );
-            print('   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
+                file, replacement.key, replacement.value);
+            print(
+                '   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
             successCount++;
           } catch (e) {
             print('   ❌ Failed to replace "${replacement.key.value}": $e');
           }
         }
         if (successCount > 0) {
-          print('   ✨ Successfully applied $successCount individual replacement(s)');
+          print(
+              '   ✨ Successfully applied $successCount individual replacement(s)');
         }
       }
     }
@@ -177,7 +177,8 @@ Future<void> runLocalizationTool(String projectPath) async {
 }
 
 /// Show additional context about where the string is located
-Future<void> _showStringContext(HardcodedStringInfo stringInfo, File file) async {
+Future<void> _showStringContext(
+    HardcodedStringInfo stringInfo, File file) async {
   try {
     final lines = await file.readAsLines();
     final lineIndex = stringInfo.line - 1;
