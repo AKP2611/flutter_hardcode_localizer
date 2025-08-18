@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_hardcode_localizer/flutter_hardcode_localizer.dart';
 
 void main(List<String> args) async {
-  print('🔍 Flutter Hardcode Localizer v1.0.2');
+  print('🔍 Flutter Hardcode Localizer');
   print('==================================');
   print('🚀 Enhanced for easy_localization package');
   print('✨ Generates LocaleKeys.key.tr() format automatically');

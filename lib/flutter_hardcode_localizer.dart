@@ -7,8 +7,8 @@
 /// - Seamless integration with easy_localization package
 /// - Generates LocaleKeys.key.tr() format automatically
 /// - Eliminates manual process of adding JSON key-values
-/// - Perfect companion for easy_localization workflow
-library flutter_hardcode_localizer;
+/// - Perfect companion for easy_localization workflow!
+library;
 
 export 'src/hardcode_detector.dart';
 export 'src/json_manager.dart';
@@ -21,23 +21,33 @@ import 'src/hardcode_detector.dart';
 import 'src/json_manager.dart';
 import 'src/code_transformer.dart';
 
-/// Main function to run the localization tool
+/// Main entry point for running the localization transformation tool.
+///
+/// - Scans all Dart files in [projectPath]/lib for hardcoded strings.
+/// - Provides interactive CLI for deciding which strings to localize (with custom key support).
+/// - Automatically updates assets/languages/en.json and replaces source code with LocaleKeys references.
+/// - Handles duplicate keys, context-aware user prompts, and robust error handling.
+/// - Prints a summary at the end and next steps for easy_localization users.
 Future<void> runLocalizationTool(String projectPath) async {
   final libDir = Directory(p.join(projectPath, 'lib'));
 
+  // Validates there is a 'lib' folder. Throws error if missing.
   if (!libDir.existsSync()) {
     throw Exception('No lib folder found at $projectPath');
   }
 
+  // Inform user about workflow being started.
   print('🔍 Scanning for hardcoded strings...');
   print('✨ Generating LocaleKeys.key.tr() format for easy_localization');
   print('🎯 Automating the manual JSON key-value creation process');
   print('');
 
+  // Instantiate utility classes for detection, management, and code transformation.
   final detector = HardcodeDetector();
   final jsonManager = JsonManager(projectPath);
   final transformer = CodeTransformer();
 
+  // Find all Dart files in the lib directory.
   final dartFiles = libDir
       .listSync(recursive: true)
       .where((f) => f.path.endsWith('.dart'))
@@ -46,10 +56,12 @@ Future<void> runLocalizationTool(String projectPath) async {
   var totalStringFound = 0;
   var totalStringProcessed = 0;
 
+  // Process each Dart file and ask about each hardcoded string.
   for (final file in dartFiles) {
     final relativePath = p.relative(file.path, from: projectPath);
     print('📄 Processing: $relativePath');
 
+    // Discover all localizable hardcoded strings.
     final hardcodedStrings = await detector.findHardcodedStrings(file);
 
     if (hardcodedStrings.isEmpty) {
@@ -60,7 +72,7 @@ Future<void> runLocalizationTool(String projectPath) async {
     totalStringFound += hardcodedStrings.length;
     print('   🔍 Found ${hardcodedStrings.length} hardcoded string(s)');
 
-    // Collect replacements for batch processing
+    // Collect replacements for batch processing after user prompts.
     final replacements = <MapEntry<HardcodedStringInfo, String>>[];
 
     for (final stringInfo in hardcodedStrings) {
@@ -68,9 +80,10 @@ Future<void> runLocalizationTool(String projectPath) async {
       print('   📝 Found: "${stringInfo.value}"');
       print('   📍 Line ${stringInfo.line}:${stringInfo.column}');
 
-      // Show context if string is in array or complex expression
+      // Show relevant code context for where string occurs
       await _showStringContext(stringInfo, file);
 
+      // Prompt for localization decision (yes/no/custom key)
       stdout.write('   ❓ Move to localization? (y/n/c for custom key): ');
       final input = stdin.readLineSync()?.toLowerCase();
 
@@ -91,7 +104,7 @@ Future<void> runLocalizationTool(String projectPath) async {
         key = stringInfo.suggestedKey;
       }
 
-      // Check if key already exists
+      // Handle duplicates: prompt user to use a different key if it’s taken
       if (await jsonManager.keyExists(key)) {
         print('   ⚠️  Key "$key" already exists in en.json');
         stdout.write('   ❓ Use different key? (y/n): ');
@@ -112,42 +125,36 @@ Future<void> runLocalizationTool(String projectPath) async {
         }
       }
 
-      // Add to JSON
+      // Add key-value translation and record for code replacement.
       await jsonManager.addTranslation(key, stringInfo.value);
-
-      // Add to replacements batch
       replacements.add(MapEntry(stringInfo, key));
 
       print('   ✅ Added "$key": "${stringInfo.value}" to en.json');
       totalStringProcessed++;
     }
 
-    // Perform batch replacement if there are any replacements
+    // Apply all replacements at once, fallback to individual replacements if needed
     if (replacements.isNotEmpty) {
       try {
         await transformer.replaceMultipleStrings(file, replacements);
-        print(
-            '   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
+        print('   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
       } catch (e) {
         print('   ❌ Failed to apply batch replacements: $e');
         print('   🔄 Trying individual replacements...');
 
-        // Fallback to individual replacements
         var successCount = 0;
         for (final replacement in replacements) {
           try {
             await transformer.replaceStringWithLocale(
                 file, replacement.key, replacement.value);
-            print(
-                '   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
+            print('   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
             successCount++;
           } catch (e) {
             print('   ❌ Failed to replace "${replacement.key.value}": $e');
           }
         }
         if (successCount > 0) {
-          print(
-              '   ✨ Successfully applied $successCount individual replacement(s)');
+          print('   ✨ Successfully applied $successCount individual replacement(s)');
         }
       }
     }
@@ -155,6 +162,7 @@ Future<void> runLocalizationTool(String projectPath) async {
     print('');
   }
 
+  // Print end-of-run summary and guidance for next steps
   print('📊 Summary:');
   print('   🔍 Total hardcoded strings found: $totalStringFound');
   print('   ✅ Strings processed: $totalStringProcessed');
@@ -176,7 +184,10 @@ Future<void> runLocalizationTool(String projectPath) async {
   }
 }
 
-/// Show additional context about where the string is located
+/// Show additional context about where the string is located in source code.
+///
+/// Prints a description if the string is part of an array, map, method/constructor,
+/// or a long/informative line. This helps users understand what they're localizing.
 Future<void> _showStringContext(
     HardcodedStringInfo stringInfo, File file) async {
   try {
@@ -186,7 +197,7 @@ Future<void> _showStringContext(
     if (lineIndex >= 0 && lineIndex < lines.length) {
       final line = lines[lineIndex].trim();
 
-      // Check if string appears to be in an array or complex structure
+      // Print context depending on detected structure type
       if (line.contains('[') && line.contains(']')) {
         print('   📍 Context: Array/List → ${_truncate(line, 60)}');
       } else if (line.contains('{') && line.contains('}')) {
@@ -198,10 +209,11 @@ Future<void> _showStringContext(
       }
     }
   } catch (e) {
-    // Ignore context errors, not critical
+    // Ignore context extraction errors, -- not critical for workflow.
   }
 }
 
+/// Truncate a string to [maxLength] characters for readable CLI output.
 String _truncate(String text, int maxLength) {
   if (text.length <= maxLength) return text;
   return '${text.substring(0, maxLength - 3)}...';

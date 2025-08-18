@@ -1,6 +1,6 @@
-# Flutter Hardcode Localizer v1.0.1
+# Flutter Hardcode Localizer CLI Utility
 
-🚀 **Enhanced for easy_localization** - Automate the tedious process of manually adding JSON key-values for Flutter localization!
+🚀 **Enhanced for easy_localization** - Automate the tedious process of manually adding JSON key-values for Flutter localization by CLI Utility!
 
 ## 🎯 **Perfect Companion for easy_localization Package**
 
@@ -39,7 +39,7 @@ final items = [LocaleKeys.save.tr(), LocaleKeys.cancel.tr(), LocaleKeys.delete.t
 // 4. You manually run: flutter packages pub run easy_localization:generate
 ```
 
-### **After (Automated with v1.0.1):**
+### **After (Automated with running CLI utility):**
 ```bash
 # Just run this tool:
 dart run flutter_hardcode_localizer:localize
@@ -96,7 +96,7 @@ Make sure you have `easy_localization` already set up in your project.
 ### **Install Tool**
 ```yaml
 dev_dependencies:
-  flutter_hardcode_localizer: ^1.0.2
+  flutter_hardcode_localizer: ^latest_version
 ```
 
 ### **Run Tool**
