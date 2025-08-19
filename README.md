@@ -15,6 +15,7 @@ Instead, it **automates everything**:
 2. ✅ **Automatically adds them to en.json** with smart key generation
 3. ✅ **Replaces strings with LocaleKeys.key.tr()** format
 4. ✅ **Works with arrays, methods, constructors, maps** seamlessly
+5. ✅ Skips **every type of import statements, assertions and annotations**
 
 ## 🔄 **What It Does**
 

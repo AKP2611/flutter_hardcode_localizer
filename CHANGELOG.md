@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.5] - 2025-08-19
+#### 🐞Unnecessary localisation of dart statements will be ignored
+- ✅ Import Statements [ import 'widgets/sample_widget.dart';  import 'dart:io'; import 'string_utils.dart'; & so on]
+- ✅ Assertions [test cases assertions will be skipped]
+- ✅ Annotations [any type of annotations used by flutter/dart plugins/packages]
+
 ## [1.0.4] - 2025-08-18
 
 ### 🎉New Tool features added 

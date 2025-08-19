@@ -25,11 +25,13 @@ void main(List<String> args) async {
       allowed: ['true', 'false'],
       defaultsTo: 'false',
     )
-    ..addOption('skipFiles',
-        abbr: 's',
-        help: 'Comma-separated list of file paths to skip.',
-        valueHelp: 'file1,file2,path/file,...',
-        defaultsTo: 'lib/ui/theme/codegen_key.g.dart');
+    ..addOption(
+      'skipFiles',
+      abbr: 's',
+      help: 'Comma-separated list of file paths to skip.',
+      valueHelp: 'file1,file2,path/file,...',
+      defaultsTo: 'lib/ui/theme/codegen_key.g.dart',
+    );
 
   final argResults = parser.parse(args);
 
@@ -52,8 +54,6 @@ void main(List<String> args) async {
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
-
-  skipFiles.add('lib/ui/theme/codegen_key.g.dart');
 
   print('   Target Path: $targetPath');
   print('   Files to skip: $skipFiles');

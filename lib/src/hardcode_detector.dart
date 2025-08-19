@@ -67,6 +67,30 @@ class _StringLiteralVisitor extends RecursiveAstVisitor<void> {
 
   _StringLiteralVisitor(this.sourceCode);
 
+  /// Visits [ImportDirective] AST nodes (standard package and file imports in Dart).
+  ///
+  /// It will be skipped in localisation process.
+  @override
+  void visitImportDirective(ImportDirective node) {
+    return;
+  }
+
+  /// Visits [Annotation] AST nodes (annotations in Dart).
+  ///
+  /// It will be skipped in localisation process.
+  @override
+  void visitAnnotation(Annotation node) {
+    return;
+  }
+
+  /// Visits [AssertStatement] AST nodes (Assert Statements in Dart).
+  ///
+  /// It will be skipped in localisation process.
+  @override
+  void visitAssertStatement(AssertStatement node) {
+    return;
+  }
+
   /// Visits [SimpleStringLiteral] AST nodes (standard string literals in Dart).
   ///
   /// Skips literals that are empty, just one char, or look like assets/URLs.

@@ -24,6 +24,8 @@ import 'src/code_transformer.dart';
 /// Main entry point for running the localization transformation tool.
 ///
 /// - Scans all Dart files in [projectPath]/lib for hardcoded strings.
+/// - [autoApproveSuggestedKeys] automatically accepts developer consent for localisation
+/// - [skipFiles] ignores the listed files in process
 /// - Provides interactive CLI for deciding which strings to localize (with custom key support).
 /// - Automatically updates assets/languages/en.json and replaces source code with LocaleKeys references.
 /// - Handles duplicate keys, context-aware user prompts, and robust error handling.

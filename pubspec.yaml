@@ -1,6 +1,6 @@
 name: flutter_hardcode_localizer
 description: A Dart plugin that finds hardcoded strings in Flutter projects and provides quick-fix to move them to localization files for easy_localization.
-version: 1.0.4
+version: 1.0.5
 homepage: https://github.com/AshishPatel2611/flutter_hardcode_localizer
 
 environment:
