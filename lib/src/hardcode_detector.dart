@@ -91,6 +91,22 @@ class _StringLiteralVisitor extends RecursiveAstVisitor<void> {
     return;
   }
 
+  /// Visits [SwitchPatternCase] AST nodes (Switch Case Statements in Dart).
+  ///
+  /// It will be skipped in localisation process.
+  @override
+  void visitSwitchPatternCase(SwitchPatternCase node) {
+    return;
+  }
+
+  /// Visits [SwitchPatternCase] AST nodes (Switch Case Statements in Dart).
+  ///
+  /// It will be skipped in localisation process.
+  @override
+  void visitIfStatement(IfStatement node) {
+    return;
+  }
+
   /// Visits [SimpleStringLiteral] AST nodes (standard string literals in Dart).
   ///
   /// Skips literals that are empty, just one char, or look like assets/URLs.

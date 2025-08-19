@@ -46,11 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   // Test: Array with hardcoded strings - READY FOR LOCALIZATION!
-  final List<String> actionButtons = [
-    'Save Document',
-    'Load Document',
-    'Delete Document'
-  ];
+  final List<String> actionButtons = ['Save Document', 'Load Document', 'Delete Document'];
 
   // Test: Map with hardcoded strings - READY FOR LOCALIZATION!
   final Map<String, String> messages = {
@@ -87,15 +83,13 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(height: 20),
 
             // Test: Display array items - THESE WILL BE LOCALIZED!
-            const Text('Action Buttons:',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Action Buttons:', style: TextStyle(fontWeight: FontWeight.bold)),
             Column(
               children: actionButtons
                   .map((action) => Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: ElevatedButton(
-                          onPressed: () =>
-                              _showMessage(messages['success'] ?? 'Done'),
+                          onPressed: () => _showMessage(messages['success'] ?? 'Done'),
                           child: Text(action),
                         ),
                       ))

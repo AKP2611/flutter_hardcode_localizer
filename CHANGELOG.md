@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.6] - 2025-08-19
+#### 🐞Unnecessary localisation of dart statements will be ignored
+- ✅ Switch Case & If expression will be skipped
+
+#### Dependencies updated.
+
 ## [1.0.5] - 2025-08-19
 #### 🐞Unnecessary localisation of dart statements will be ignored
 - ✅ Import Statements [ import 'widgets/sample_widget.dart';  import 'dart:io'; import 'string_utils.dart'; & so on]

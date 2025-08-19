@@ -1,9 +1,8 @@
-/// Flutter Hardcode Localizer v1.0.1
+/// Flutter Hardcode Localizer
 ///
 /// A tool for finding hardcoded strings in Flutter projects and
 /// providing quick-fix functionality to move them to localization files.
 ///
-/// ENHANCED IN v1.0.1:
 /// - Seamless integration with easy_localization package
 /// - Generates LocaleKeys.key.tr() format automatically
 /// - Eliminates manual process of adding JSON key-values
@@ -218,7 +217,7 @@ Future<void> runLocalizationTool(String projectPath,
     print('   5. Test your application');
     print('');
     print('✨ No more manual JSON key-value creation needed!');
-    print('✨ Thanks for using Flutter Hardcode Localizer v1.0.1!');
+    print('✨ Thanks for using Flutter Hardcode Localizer!');
   }
 }
 
