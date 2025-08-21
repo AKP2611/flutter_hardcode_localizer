@@ -109,18 +109,24 @@ dart run flutter_hardcode_localizer:localize
 dart run flutter_hardcode_localizer:localize \
   --targetPath example \
   --skipFiles lib/widgets/skip_file_1.dart,lib/widgets/skip_file_2.dart  \
-  --autoApproveSuggestedKeys true
+  --autoApproveSuggestedKeys true \
+  --prefix prefixText
   
 --targetPath
 (Optional) Path to your project’s target directory.
+(Default) '.'
 
 --autoApproveSuggestedKeys
 (Optional, true/false) Automatically approve suggested JSON keys without developer consent.
+(Default) false
 
 --skipFiles
 (Optional) Comma-separated list of file paths to skip during processing.
+(Default) [lib/ui/theme/codegen_key.g.dart]
 
-lib/ui/theme/codegen_key.g.dart will be skipped automatically, no need to manually add this in skipFiles array
+--prefix
+(Optional) Add [a-z]{2,6} prefix to every json keys.
+(Default) ''
 ```
 
 ## 📋 **Complete easy_localization Workflow**

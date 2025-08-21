@@ -12,55 +12,79 @@ void main(List<String> args) async {
   print('🎯 Removes manual JSON key-value creation process');
 
   final parser = ArgParser()
+    ..addOption('targetPath',
+        abbr: 'p', help: 'The target path for the project.')
+    ..addOption('autoApproveSuggestedKeys',
+        abbr: 'a',
+        help:
+            'Allow automatic approval of suggested JSON keys without requiring developer consent.',
+        allowed: ['true', 'false'],
+        defaultsTo: 'false')
+    ..addOption('skipFiles',
+        abbr: 's',
+        help: 'Comma-separated list of file paths to skip.',
+        valueHelp: 'file1,file2,path/file,...')
     ..addOption(
-      'targetPath',
-      abbr: 'p',
-      help: 'The target path for the project.',
-    )
-    ..addOption(
-      'autoApproveSuggestedKeys',
-      abbr: 'a',
-      help:
-          'Allow automatic approval of suggested JSON keys without requiring developer consent.',
-      allowed: ['true', 'false'],
-      defaultsTo: 'false',
-    )
-    ..addOption(
-      'skipFiles',
-      abbr: 's',
-      help: 'Comma-separated list of file paths to skip.',
-      valueHelp: 'file1,file2,path/file,...',
-      defaultsTo: 'lib/ui/theme/codegen_key.g.dart',
+      'prefix',
+      abbr: 'f',
+      help: 'Add [a-z]{2,6} prefix to every json keys.',
+      valueHelp: 'prefixSuggestedKey',
+      defaultsTo: '',
     );
 
   final argResults = parser.parse(args);
 
+  // Parse targetPath
   final targetPath = (argResults['targetPath'] != null &&
               argResults['targetPath'].toString().isNotEmpty) ==
           true
       ? argResults['targetPath'] as String
       : '.';
 
-  // Parse string to bool
-  final autoApproveSuggestedKeys =
-      (argResults['autoApproveSuggestedKeys'] == 'true');
+  // Parse autoApproveSuggestedKeys
+  final autoApproveSuggestedKeys = ((argResults['autoApproveSuggestedKeys'] !=
+                  null &&
+              argResults['autoApproveSuggestedKeys'].toString().isNotEmpty) ==
+          true)
+      ? (argResults['autoApproveSuggestedKeys'] == 'true')
+      : false;
 
-  // Parse the comma-separated string into a List<String>
-  final skipFilesRaw = argResults['skipFiles'] as String;
-  final skipFiles = skipFilesRaw.isEmpty
+  // Parse the comma-separated skipFiles into a List<String>
+  final skipFilesString = ((argResults['skipFiles'] != null &&
+              argResults['skipFiles'].toString().isNotEmpty) ==
+          true)
+      ? argResults['skipFiles'] as String
+      : '';
+  final skipFiles = skipFilesString.isEmpty
       ? <String>[]
-      : skipFilesRaw
+      : skipFilesString
           .split(',')
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
 
+  skipFiles.add('lib/ui/theme/codegen_key.g.dart');
+
+  // Parse prefix which will be appended to suggested json key
+  final String prefix = (argResults['prefix'] != null &&
+              argResults['prefix'].toString().isNotEmpty) ==
+          true
+      ? argResults['prefix'] as String
+      : '';
+
   print('   Target Path: $targetPath');
   print('   Files to skip: $skipFiles');
   print('   Auto Approve Suggested Keys: $autoApproveSuggestedKeys');
+  print('   prefix: $prefix');
+  print('   ');
 
   if (!Directory(targetPath).existsSync()) {
     print('❌ Directory not found: $targetPath');
+    exit(1);
+  }
+
+  if (prefix.isNotEmpty && !RegExp(r'^[a-z]{2,6}$').hasMatch(prefix)) {
+    print('❌ Prefix must follow: [a-z]{2,6}');
     exit(1);
   }
 
@@ -68,7 +92,12 @@ void main(List<String> args) async {
   print('');
 
   try {
-    await runLocalizationTool(targetPath, autoApproveSuggestedKeys, skipFiles);
+    await runLocalizationTool(
+        args: AdditionalRunArguments(
+            targetPath: targetPath,
+            skipFiles: skipFiles,
+            autoApproveSuggestedKeys: autoApproveSuggestedKeys,
+            prefix: prefix));
     print('');
     print('✅ Localization process completed successfully!');
   } catch (e) {

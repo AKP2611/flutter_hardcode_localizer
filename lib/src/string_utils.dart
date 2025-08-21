@@ -1,3 +1,5 @@
+import 'package:flutter_hardcode_localizer/flutter_hardcode_localizer.dart';
+
 /// StringUtils
 ///
 /// Utility for generating localization keys in standard camelCase format.
@@ -21,16 +23,22 @@ class StringUtils {
     // If empty after cleaning, return a generic placeholder key
     if (words.isEmpty) return 'unknownKey';
 
-    // Build key: first word stays lower, others are capitalized
-    final key =
-        words.first + words.skip(1).map((word) => _capitalize(word)).join();
+    if (additionalRunArguments.prefix.isNotEmpty) {
+      final key = additionalRunArguments.prefix.toLowerCase() +
+          words.map((word) => _capitalize(word)).join();
+      return key;
+    } else {
+      // Build key: first word stays lower, others are capitalized
+      final key =
+          words.first + words.skip(1).map((word) => _capitalize(word)).join();
 
-    // Safeguard: If key doesn't start with a letter, prepend 'text'
-    if (!RegExp(r'^[a-zA-Z]').hasMatch(key)) {
-      return 'text$key';
+      // Safeguard: If key doesn't start with a letter, prepend 'text'
+      if (!RegExp(r'^[a-zA-Z]').hasMatch(key)) {
+        return 'text$key';
+      }
+
+      return key;
     }
-
-    return key;
   }
 
   /// Capitalize the first letter of [word], leave rest as-is.

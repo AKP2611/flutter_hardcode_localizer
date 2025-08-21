@@ -20,22 +20,27 @@ import 'src/hardcode_detector.dart';
 import 'src/json_manager.dart';
 import 'src/code_transformer.dart';
 
+AdditionalRunArguments additionalRunArguments = AdditionalRunArguments(
+  targetPath: '.',
+  prefix: '',
+  autoApproveSuggestedKeys: false,
+  skipFiles: ['lib/ui/theme/codegen_key.g.dart'],
+);
+
 /// Main entry point for running the localization transformation tool.
 ///
-/// - Scans all Dart files in [projectPath]/lib for hardcoded strings.
-/// - [autoApproveSuggestedKeys] automatically accepts developer consent for localisation
-/// - [skipFiles] ignores the listed files in process
 /// - Provides interactive CLI for deciding which strings to localize (with custom key support).
 /// - Automatically updates assets/languages/en.json and replaces source code with LocaleKeys references.
 /// - Handles duplicate keys, context-aware user prompts, and robust error handling.
 /// - Prints a summary at the end and next steps for easy_localization users.
-Future<void> runLocalizationTool(String projectPath,
-    bool autoApproveSuggestedKeys, List<String> skipFiles) async {
-  final libDir = Directory(p.join(projectPath, 'lib'));
+Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
+  additionalRunArguments = args;
+  final libDir = Directory(p.join(additionalRunArguments.targetPath, 'lib'));
 
   // Validates there is a 'lib' folder. Throws error if missing.
   if (!libDir.existsSync()) {
-    throw Exception('No lib folder found at $projectPath');
+    throw Exception(
+        'No lib folder found at ${additionalRunArguments.targetPath}');
   }
 
   // Inform user about workflow being started.
@@ -46,7 +51,7 @@ Future<void> runLocalizationTool(String projectPath,
 
   // Instantiate utility classes for detection, management, and code transformation.
   final detector = HardcodeDetector();
-  final jsonManager = JsonManager(projectPath);
+  final jsonManager = JsonManager(additionalRunArguments.targetPath);
   final transformer = CodeTransformer();
 
   // Find all Dart files in the lib directory.
@@ -60,9 +65,10 @@ Future<void> runLocalizationTool(String projectPath,
 
   // Process each Dart file and ask about each hardcoded string.
   for (final file in dartFiles) {
-    final relativePath = p.relative(file.path, from: projectPath);
+    final relativePath =
+        p.relative(file.path, from: additionalRunArguments.targetPath);
 
-    bool canSkipFile = skipFiles
+    bool canSkipFile = additionalRunArguments.skipFiles
         .any((test) => test.toLowerCase() == relativePath.toLowerCase());
 
     if (canSkipFile) {
@@ -94,7 +100,7 @@ Future<void> runLocalizationTool(String projectPath,
       await _showStringContext(stringInfo, file);
 
       String key = stringInfo.suggestedKey;
-      if (autoApproveSuggestedKeys) {
+      if (additionalRunArguments.autoApproveSuggestedKeys) {
         // Auto-approve localization for all strings
         print(
             '   ✅ Auto-approved localization for: "${stringInfo.value}" with key "$key"');
@@ -254,4 +260,21 @@ Future<void> _showStringContext(
 String _truncate(String text, int maxLength) {
   if (text.length <= maxLength) return text;
   return '${text.substring(0, maxLength - 3)}...';
+}
+
+/// - Scans all Dart files in [targetPath]/lib for hardcoded strings.
+/// - [autoApproveSuggestedKeys] automatically accepts developer consent for localisation
+/// - [skipFiles] ignores the listed files in process
+/// - [prefix] appends the prefix in json keys
+class AdditionalRunArguments {
+  final String targetPath;
+  final bool autoApproveSuggestedKeys;
+  final List<String> skipFiles;
+  final String prefix;
+
+  AdditionalRunArguments(
+      {required this.targetPath,
+      required this.autoApproveSuggestedKeys,
+      required this.skipFiles,
+      required this.prefix});
 }

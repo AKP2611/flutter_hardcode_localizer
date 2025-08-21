@@ -9,7 +9,8 @@ import 'hardcode_detector.dart';
 /// Can process both single and multiple replacements in code files.
 class CodeTransformer {
   // Formatter for Dart code; keeps code clean after replacements
-  final DartFormatter _formatter = DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
+  final DartFormatter _formatter =
+      DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
 
   /// Replace a hardcoded string with LocaleKeys.key.tr() for easy_localization
   ///
