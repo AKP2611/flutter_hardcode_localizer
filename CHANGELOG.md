@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.8] - 2025-08-28
+#### 🐞Unnecessary localisation of dart statements will be ignored
+- ✅ Print statements invoked with print("someText") method will be skipped now
+
+#### Dependencies updated.
+
 ## [1.0.7] - 2025-08-21
 ### 🎉New Tool features added
 #### Additional optional run argument **prefix** added for CLI tool

@@ -107,6 +107,17 @@ class _StringLiteralVisitor extends RecursiveAstVisitor<void> {
     return;
   }
 
+  /// Visits [MethodInvocation] AST nodes (Search for print statements in method).
+  ///
+  /// It will be skipped in localisation process if text is in print statements.
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    if (node.methodName.name == 'print' && node.target == null) {
+      return;
+    }
+    super.visitMethodInvocation(node);
+  }
+
   /// Visits [SimpleStringLiteral] AST nodes (standard string literals in Dart).
   ///
   /// Skips literals that are empty, just one char, or look like assets/URLs.
