@@ -25,6 +25,7 @@ AdditionalRunArguments additionalRunArguments = AdditionalRunArguments(
   prefix: '',
   autoApproveSuggestedKeys: false,
   skipFiles: ['lib/ui/theme/codegen_key.g.dart'],
+  languages: ['en'],
 );
 
 /// Main entry point for running the localization transformation tool.
@@ -39,8 +40,7 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
 
   // Validates there is a 'lib' folder. Throws error if missing.
   if (!libDir.existsSync()) {
-    throw Exception(
-        'No lib folder found at ${additionalRunArguments.targetPath}');
+    throw Exception('No lib folder found at ${additionalRunArguments.targetPath}');
   }
 
   // Inform user about workflow being started.
@@ -51,25 +51,21 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
 
   // Instantiate utility classes for detection, management, and code transformation.
   final detector = HardcodeDetector();
-  final jsonManager = JsonManager(additionalRunArguments.targetPath);
+  final List<JsonManager> jsonManagerList =
+      additionalRunArguments.languages.map((l) => JsonManager(additionalRunArguments.targetPath, l)).toList();
   final transformer = CodeTransformer();
 
   // Find all Dart files in the lib directory.
-  final dartFiles = libDir
-      .listSync(recursive: true)
-      .where((f) => f.path.endsWith('.dart'))
-      .cast<File>();
+  final dartFiles = libDir.listSync(recursive: true).where((f) => f.path.endsWith('.dart')).cast<File>();
 
   var totalStringFound = 0;
   var totalStringProcessed = 0;
 
   // Process each Dart file and ask about each hardcoded string.
   for (final file in dartFiles) {
-    final relativePath =
-        p.relative(file.path, from: additionalRunArguments.targetPath);
+    final relativePath = p.relative(file.path, from: additionalRunArguments.targetPath);
 
-    bool canSkipFile = additionalRunArguments.skipFiles
-        .any((test) => test.toLowerCase() == relativePath.toLowerCase());
+    bool canSkipFile = additionalRunArguments.skipFiles.any((test) => test.toLowerCase() == relativePath.toLowerCase());
 
     if (canSkipFile) {
       print('   ⏭️  Skipped $relativePath');
@@ -102,8 +98,7 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
       String key = stringInfo.suggestedKey;
       if (additionalRunArguments.autoApproveSuggestedKeys) {
         // Auto-approve localization for all strings
-        print(
-            '   ✅ Auto-approved localization for: "${stringInfo.value}" with key "$key"');
+        print('   ✅ Auto-approved localization for: "${stringInfo.value}" with key "$key"');
       } else {
         // Prompt for localization decision (yes/no/custom key)
         stdout.write('   ❓ Move to localization? (y/n/c for custom key): ');
@@ -126,45 +121,48 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
         }
       }
 
-      bool addToJson = true;
+      for (JsonManager jsonManager in jsonManagerList) {
+        bool addToJson = true;
+        String lang = jsonManager.languageCode;
 
-      // Handle duplicates: prompt user to use a different key if it’s taken
-      if (await jsonManager.keyExists(key)) {
-        print('   ⚠️  Key "$key" already exists in en.json');
-        stdout.write('   ❓ Use different key? (y/n/s): ');
-        final enteredOption = stdin.readLineSync()?.toLowerCase();
+        // Handle duplicates: prompt user to use a different key if it’s taken
+        if (await jsonManager.keyExists(key)) {
+          print('   ⚠️  Key "$key" already exists in $lang.json');
+          stdout.write('   ❓ Use different key? (y/n/s): ');
+          final enteredOption = stdin.readLineSync()?.toLowerCase();
 
-        final useOther = enteredOption == 'y';
-        final skipKey = enteredOption == 's';
-        final useSameKey = enteredOption == 'n';
+          final useOther = enteredOption == 'y';
+          final skipKey = enteredOption == 's';
+          final useSameKey = enteredOption == 'n';
 
-        if (useOther) {
-          stdout.write('   🔑 Enter new key: ');
-          final newKey = stdin.readLineSync();
-          if (newKey != null && newKey.isNotEmpty) {
-            key = newKey;
+          if (useOther) {
+            stdout.write('   🔑 Enter new key: ');
+            final newKey = stdin.readLineSync();
+            if (newKey != null && newKey.isNotEmpty) {
+              key = newKey;
+            } else {
+              print('   ❌ Invalid key, skipping');
+              continue;
+            }
+          } else if (skipKey) {
+            print('   ⏭️  Skipped due to duplicate key');
+            continue;
+          } else if (useSameKey) {
+            addToJson = false;
           } else {
-            print('   ❌ Invalid key, skipping');
+            print('   ⏭️  Skipped due to invalid input');
             continue;
           }
-        } else if (skipKey) {
-          print('   ⏭️  Skipped due to duplicate key');
-          continue;
-        } else if (useSameKey) {
-          addToJson = false;
-        } else {
-          print('   ⏭️  Skipped due to invalid input');
-          continue;
         }
-      }
 
-      if (addToJson) {
-        // Add key-value translation and record for code replacement.
-        await jsonManager.addTranslation(key, stringInfo.value);
-        print('   ✅ Added "$key": "${stringInfo.value}" to en.json');
-      } else {
-        // Reused same json key to replace in code
-        print('   ♻️ Reused "$key": "${stringInfo.value}" from en.json');
+        if (addToJson) {
+          // Add key-value translation and record for code replacement.
+          await jsonManager.addTranslation(key, stringInfo.value);
+          print('   ✅ Added "$key": "${stringInfo.value}" to $lang.json');
+        } else {
+          // Reused same json key to replace in code
+          print('   ♻️ Reused "$key": "${stringInfo.value}" from $lang.json');
+        }
       }
 
       replacements.add(MapEntry(stringInfo, key));
@@ -177,8 +175,7 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
       try {
         await transformer.replaceMultipleStrings(file, replacements);
         print('\n');
-        print(
-            '   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
+        print('   ✨ Applied ${replacements.length} LocaleKeys.key.tr() replacement(s)');
       } catch (e) {
         print('   ❌ Failed to apply batch replacements: $e');
         print('   🔄 Trying individual replacements...');
@@ -186,18 +183,15 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
         var successCount = 0;
         for (final replacement in replacements) {
           try {
-            await transformer.replaceStringWithLocale(
-                file, replacement.key, replacement.value);
-            print(
-                '   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
+            await transformer.replaceStringWithLocale(file, replacement.key, replacement.value);
+            print('   ✅ Replaced "${replacement.key.value}" with LocaleKeys.${replacement.value}.tr()');
             successCount++;
           } catch (e) {
             print('   ❌ Failed to replace "${replacement.key.value}": $e');
           }
         }
         if (successCount > 0) {
-          print(
-              '   ✨ Successfully applied $successCount individual replacement(s)');
+          print('   ✨ Successfully applied $successCount individual replacement(s)');
         }
       }
     }
@@ -231,8 +225,7 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
 ///
 /// Prints a description if the string is part of an array, map, method/constructor,
 /// or a long/informative line. This helps users understand what they're localizing.
-Future<void> _showStringContext(
-    HardcodedStringInfo stringInfo, File file) async {
+Future<void> _showStringContext(HardcodedStringInfo stringInfo, File file) async {
   try {
     final lines = await file.readAsLines();
     final lineIndex = stringInfo.line - 1;
@@ -271,10 +264,12 @@ class AdditionalRunArguments {
   final bool autoApproveSuggestedKeys;
   final List<String> skipFiles;
   final String prefix;
+  final List<String> languages;
 
   AdditionalRunArguments(
       {required this.targetPath,
       required this.autoApproveSuggestedKeys,
       required this.skipFiles,
-      required this.prefix});
+      required this.prefix,
+      required this.languages});
 }

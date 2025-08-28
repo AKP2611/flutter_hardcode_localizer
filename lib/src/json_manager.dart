@@ -16,6 +16,9 @@ class JsonManager {
   /// Directory of the Flutter project (absolute or relative)
   final String projectPath;
 
+  /// Language Code of the json file
+  final String languageCode;
+
   /// Path to the translations JSON file (e.g., assets/languages/en.json)
   late final String jsonPath;
 
@@ -26,9 +29,9 @@ class JsonManager {
   ///
   /// - [projectPath]: Root directory of the Flutter project.
   /// - Always uses `assets/languages/en.json` to match easy_localization.
-  JsonManager(this.projectPath) {
+  JsonManager(this.projectPath, this.languageCode) {
     // Updated path to match easy_localization convention: assets/languages/
-    jsonPath = p.join(projectPath, 'assets/languages', 'en.json');
+    jsonPath = p.join(projectPath, 'assets/languages', '$languageCode.json');
     _loadTranslations();
   }
 
@@ -36,17 +39,19 @@ class JsonManager {
   ///
   /// Handles file-not-found, and logs parsing errors without crashing.
   /// Ensures [_translations] is always a valid map (even if empty).
-  void _loadTranslations() {
+  Future<void> _loadTranslations() async {
     final file = File(jsonPath);
     if (file.existsSync()) {
       try {
         final content = file.readAsStringSync();
         _translations = json.decode(content) as Map<String, dynamic>;
       } catch (e) {
-        print('⚠️  Warning: Could not parse existing en.json: $e');
+        print('⚠️  Warning: Could not parse existing $languageCode.json: $e');
         _translations = {}; // Start fresh if corrupt
       }
     } else {
+      // Ensure directory exists (never fails if already present)
+      await file.parent.create(recursive: true);
       _translations = {}; // New file; nothing loaded
     }
   }
