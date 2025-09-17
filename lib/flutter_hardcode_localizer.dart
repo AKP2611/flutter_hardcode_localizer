@@ -24,6 +24,7 @@ AdditionalRunArguments additionalRunArguments = AdditionalRunArguments(
   targetPath: '.',
   prefix: '',
   autoApproveSuggestedKeys: false,
+  targetFiles: [],
   skipFiles: ['lib/ui/theme/codegen_key.g.dart'],
 );
 
@@ -68,8 +69,17 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
     final relativePath =
         p.relative(file.path, from: additionalRunArguments.targetPath);
 
-    bool canSkipFile = additionalRunArguments.skipFiles
-        .any((test) => test.toLowerCase() == relativePath.toLowerCase());
+    bool canSkipFile = false;
+
+    if (additionalRunArguments.skipFiles.isNotEmpty) {
+      canSkipFile = additionalRunArguments.skipFiles
+          .any((test) => test.toLowerCase() == relativePath.toLowerCase());
+    }
+
+    if (additionalRunArguments.targetFiles.isNotEmpty) {
+      canSkipFile = additionalRunArguments.targetFiles
+          .any((test) => test.toLowerCase() != relativePath.toLowerCase());
+    }
 
     if (canSkipFile) {
       print('   ⏭️  Skipped $relativePath');
@@ -265,16 +275,19 @@ String _truncate(String text, int maxLength) {
 /// - Scans all Dart files in [targetPath]/lib for hardcoded strings.
 /// - [autoApproveSuggestedKeys] automatically accepts developer consent for localisation
 /// - [skipFiles] ignores the listed files in process
+/// - [targetFiles] process only listed files
 /// - [prefix] appends the prefix in json keys
 class AdditionalRunArguments {
   final String targetPath;
   final bool autoApproveSuggestedKeys;
   final List<String> skipFiles;
+  final List<String> targetFiles;
   final String prefix;
 
   AdditionalRunArguments(
       {required this.targetPath,
       required this.autoApproveSuggestedKeys,
       required this.skipFiles,
+      required this.targetFiles,
       required this.prefix});
 }

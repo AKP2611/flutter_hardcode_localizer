@@ -30,7 +30,11 @@ void main(List<String> args) async {
       help: 'Add [a-z]{2,6} prefix to every json keys.',
       valueHelp: 'prefixSuggestedKey',
       defaultsTo: '',
-    );
+    )
+    ..addOption('targetFiles',
+        abbr: 't',
+        help: 'Comma-separated list of file paths to process.',
+        valueHelp: 'file1,file2,path/file,...');
 
   final argResults = parser.parse(args);
 
@@ -72,7 +76,23 @@ void main(List<String> args) async {
       ? argResults['prefix'] as String
       : '';
 
+  // Parse the comma-separated ProcessFiles into a List<String>
+  final targetFilesString = ((argResults['targetFiles'] != null &&
+              argResults['targetFiles'].toString().isNotEmpty) ==
+          true)
+      ? argResults['targetFiles'] as String
+      : '';
+  final targetFiles = targetFilesString.isEmpty
+      ? <String>[]
+      : targetFilesString
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
+
   print('   Target Path: $targetPath');
+  print('   Target Files: ${targetFiles.isEmpty ? "All" : targetFiles}');
   print('   Files to skip: $skipFiles');
   print('   Auto Approve Suggested Keys: $autoApproveSuggestedKeys');
   print('   prefix: $prefix');
@@ -95,6 +115,7 @@ void main(List<String> args) async {
     await runLocalizationTool(
         args: AdditionalRunArguments(
             targetPath: targetPath,
+            targetFiles: targetFiles,
             skipFiles: skipFiles,
             autoApproveSuggestedKeys: autoApproveSuggestedKeys,
             prefix: prefix));

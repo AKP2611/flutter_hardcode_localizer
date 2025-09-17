@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.0.9] - 2025-09-17
+### 🎉New Tool features added
+#### Additional optional run argument **targetFiles** added for CLI tool
+```bash
+dart run flutter_hardcode_localizer:localize \
+  --targetPath example \
+  --targetFiles lib/main.dart \
+  --skipFiles lib/widgets/skip_file_1.dart,lib/widgets/skip_file_2.dart  \
+  --autoApproveSuggestedKeys true \
+  --prefix prefixText
+  
+--targetPath
+(Optional) Path to your project’s target directory.
+(Default) '.'
+
+--targetFiles
+(Optional) Comma-separated list of file paths to process, rest of the files will be skipped.
+(Default) []
+
+--autoApproveSuggestedKeys
+(Optional, true/false) Automatically approve suggested JSON keys without developer consent.
+(Default) false
+
+--skipFiles
+(Optional) Comma-separated list of file paths to skip during processing.
+(Default) [lib/ui/theme/codegen_key.g.dart]
+
+--prefix
+(Optional) Add [a-z]{2,6} prefix to every json keys.
+(Default) ''
+
+```
+
 ## [1.0.8] - 2025-08-28
 #### 🐞Unnecessary localisation of dart statements will be ignored
 - ✅ Print statements invoked with print("someText") method will be skipped now
