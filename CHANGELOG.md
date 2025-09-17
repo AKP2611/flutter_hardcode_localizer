@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.10] - 2025-08-28
+#### 🐞Fixes
+- ✅ Fixed target files processing issue
+- ✅ run tool command in readme.md file updated
+
+#### Dependencies updated.
+
 ## [1.0.9] - 2025-09-17
 ### 🎉New Tool features added
 #### Additional optional run argument **targetFiles** added for CLI tool

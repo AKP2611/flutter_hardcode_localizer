@@ -102,12 +102,9 @@ dev_dependencies:
 
 ### **Run Tool**
 ```bash
-# On current directory
-dart run flutter_hardcode_localizer:localize 
-
-# With arguments including features 
 dart run flutter_hardcode_localizer:localize \
   --targetPath example \
+  --targetFiles lib/main.dart,lib/widgets/sample_widget.dart \
   --skipFiles lib/widgets/skip_file_1.dart,lib/widgets/skip_file_2.dart  \
   --autoApproveSuggestedKeys true \
   --prefix prefixText
@@ -115,6 +112,10 @@ dart run flutter_hardcode_localizer:localize \
 --targetPath
 (Optional) Path to your project’s target directory.
 (Default) '.'
+
+--targetFiles
+(Optional) Comma-separated list of full file paths to process, rest of the files will be skipped.
+(Default) []
 
 --autoApproveSuggestedKeys
 (Optional, true/false) Automatically approve suggested JSON keys without developer consent.
@@ -127,6 +128,7 @@ dart run flutter_hardcode_localizer:localize \
 --prefix
 (Optional) Add [a-z]{2,6} prefix to every json keys.
 (Default) ''
+
 ```
 
 ## 📋 **Complete easy_localization Workflow**

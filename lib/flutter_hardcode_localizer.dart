@@ -77,8 +77,10 @@ Future<void> runLocalizationTool({required AdditionalRunArguments args}) async {
     }
 
     if (additionalRunArguments.targetFiles.isNotEmpty) {
-      canSkipFile = additionalRunArguments.targetFiles
-          .any((test) => test.toLowerCase() != relativePath.toLowerCase());
+      canSkipFile = !additionalRunArguments.targetFiles
+          .any((test) {
+        return test.toLowerCase() == relativePath.toLowerCase();
+      });
     }
 
     if (canSkipFile) {
